@@ -119,6 +119,11 @@ func resourceComputeInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
+			"public_ip" : &schema.Schema{
+				Type: schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -304,6 +309,10 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		d.Set(prefix+".name", iface.Name)
 		d.Set(prefix+".internal_address", iface.NetworkIP)
 	}
+
+	pubIface := instance.NetworkInterfaces[0]
+	log.Printf("[DEBUG] Will set public address as %s", pubIface.AccessConfigs[0].NatIP)
+	d.Set("public_ip", pubIface.AccessConfigs[0].NatIP)
 
 	// Set the metadata fingerprint if there is one.
 	if instance.Metadata != nil {
