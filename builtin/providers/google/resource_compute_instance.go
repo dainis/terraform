@@ -71,6 +71,11 @@ func resourceComputeInstance() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
+
+						"device_name": &schema.Schema{
+							Type: schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -221,6 +226,10 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 			}
 
 			disk.InitializeParams.DiskType = diskType.SelfLink
+		}
+
+		if v, ok := d.GetOk(prefix  + ".device_name"); ok {
+			disk.DeviceName = v.(string)
 		}
 
 		disks = append(disks, &disk)
