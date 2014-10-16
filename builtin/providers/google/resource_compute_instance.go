@@ -73,7 +73,7 @@ func resourceComputeInstance() *schema.Resource {
 						},
 
 						"device_name": &schema.Schema{
-							Type: schema.TypeString,
+							Type:     schema.TypeString,
 							Optional: true,
 						},
 					},
@@ -139,6 +139,11 @@ func resourceComputeInstance() *schema.Resource {
 			},
 
 			"tags_fingerprint": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"public_ip": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -228,7 +233,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 			disk.InitializeParams.DiskType = diskType.SelfLink
 		}
 
-		if v, ok := d.GetOk(prefix  + ".device_name"); ok {
+		if v, ok := d.GetOk(prefix + ".device_name"); ok {
 			disk.DeviceName = v.(string)
 		}
 
@@ -348,6 +353,12 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		prefix := fmt.Sprintf("network.%d", i)
 		d.Set(prefix+".name", iface.Name)
 		d.Set(prefix+".internal_address", iface.NetworkIP)
+	}
+
+	if(len(instance.NetworkInterfaces) > 0) {
+		pubIface := instance.NetworkInterfaces[0]
+		log.Printf("[DEBUG] Will set public address as %s", pubIface.AccessConfigs[0].NatIP)
+		d.Set("public_ip", pubIface.AccessConfigs[0].NatIP)
 	}
 
 	// Set the metadata fingerprint if there is one.
